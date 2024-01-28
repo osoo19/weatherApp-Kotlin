@@ -1,7 +1,9 @@
 package com.example.myapplication
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.Manifest
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -22,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -39,6 +43,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_DENIED
+        ) {
+            // 位置情報許可をリクエスト
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                100
+            )
+        }
+
 
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
@@ -83,6 +100,9 @@ class MainActivity : ComponentActivity() {
             SearchButton("北海道") {
                 getWeatherDataAndNavigate(navController, "Hokkaido")
             }
+            SearchButton("現在地") {
+                getWeatherDataAndNavigate(navController, "現在地")
+            }
         }
     }
 
@@ -124,8 +144,6 @@ class MainActivity : ComponentActivity() {
     private fun getWeatherDataAndNavigate(navController: NavController, location: String) {
         viewModel.getWeatherData(
             context = this,
-            latitude = null,
-            longitude = null,
             location = location,
             callback = object : MainViewModel.VolleyCallback {
                 override fun onSuccess(result: List<WeatherItem>) {
