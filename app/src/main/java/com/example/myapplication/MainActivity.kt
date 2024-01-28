@@ -68,12 +68,14 @@ class MainActivity : ComponentActivity() {
                         HomeScreen(navController)
                     }
                     composable(
+                        //  天気予報表示画面
                         route = "forecast/{location}",
                         arguments = listOf(navArgument("location") { type = NavType.StringType })
                     ) { entry ->
                         ForecastScreen(navController, entry.arguments?.getString("location"))
                     }
                     composable(
+                        //  リトライ画面
                         route = "retry/{location}",
                         arguments = listOf(navArgument("location") { type = NavType.StringType })
                     ) { entry ->
@@ -127,6 +129,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun ForecastScreen(navController: NavController, location: String?) {
+        //  天気予報表示画面
         val result = viewModel.getWeatherDataResult()
 
         Column(
@@ -151,6 +154,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun RetryScreen(navController: NavController, location: String?) {
+        //  リトライ画面
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -174,20 +178,18 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
     private fun getWeatherDataAndNavigate(navController: NavController, location: String) {
+        //  予報データを取得して画面遷移
         viewModel.getWeatherData(
             context = this,
             location = location,
             callback = object : MainViewModel.VolleyCallback {
                 override fun onSuccess(result: List<WeatherItem>) {
-                    Log.d(TAG, "API Response: $result")
                     navController.navigate("forecast/$location")
                 }
 
                 override fun onError(error: String?) {
-                    // エラー処理
-                    Log.e(TAG, "API Error: $error")
+                    // エラーの場合リトライ画面へ
                     navController.navigate("retry/$location")
 
                 }

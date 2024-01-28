@@ -41,8 +41,7 @@ class MainViewModel : ViewModel() {
         val cachedData = getFromCache(context = context, key = cacheKey)
 
         if (cachedData != null && cachedData.isNotBlank() && location != "現在地") {
-            // キャッシュが存在する場合はキャッシュのデータを返す
-            // 結果をセット
+            // キャッシュが存在する場合は返す
             weatherData = parseJsonToWeatherData(cachedData)
 
             // 成功時のコールバックにデータモデルを渡す
@@ -84,7 +83,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    // 通信結果を取得するメソッド
+    // 通信結果を取得
     fun getWeatherDataResult(): List<WeatherItem>? {
         return weatherData
     }
@@ -118,6 +117,7 @@ class MainViewModel : ViewModel() {
         return weatherData.list
     }
 
+    // 位置情報を取得
     private fun requestLocation(context: Context): Map<String, Double>? {
         val locationMap = mutableMapOf<String, Double>()
 
@@ -151,7 +151,7 @@ class MainViewModel : ViewModel() {
         return currentDate.format(formatter)
     }
 
-    // キャッシュを保存するメソッド
+    // キャッシュ操作メソッド
     private fun saveToCache(context: Context, key: String, data: String) {
         val preferences = context.getSharedPreferences("WeatherCache", Context.MODE_PRIVATE)
         val editor = preferences.edit()
