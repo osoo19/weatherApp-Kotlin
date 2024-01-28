@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -70,7 +71,13 @@ class MainActivity : ComponentActivity() {
                         route = "forecast/{location}",
                         arguments = listOf(navArgument("location") { type = NavType.StringType })
                     ) { entry ->
-                        ForecastScreen(navController)
+                        ForecastScreen(navController, entry.arguments?.getString("location"))
+                    }
+                    composable(
+                        route = "retry/{location}",
+                        arguments = listOf(navArgument("location") { type = NavType.StringType })
+                    ) { entry ->
+                        RetryScreen(navController, entry.arguments?.getString("location"))
                     }
                 }
             }
@@ -119,7 +126,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ForecastScreen(navController: NavController) {
+    fun ForecastScreen(navController: NavController, location: String?) {
         val result = viewModel.getWeatherDataResult()
 
         Column(
@@ -141,6 +148,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun RetryScreen(navController: NavController, location: String?) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "通信に失敗しました。")
+            if (location != null) {
+                Button(
+                    onClick = {
+                        getWeatherDataAndNavigate(navController, location)
+                    },
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                ) {
+                    Text(text = "リトライ")
+                }
+            }
+        }
+    }
+
+
+
     private fun getWeatherDataAndNavigate(navController: NavController, location: String) {
         viewModel.getWeatherData(
             context = this,
@@ -152,8 +185,10 @@ class MainActivity : ComponentActivity() {
                 }
 
                 override fun onError(error: String?) {
-                    Log.e(TAG, "API Error: $error")
                     // エラー処理
+                    Log.e(TAG, "API Error: $error")
+                    navController.navigate("retry/$location")
+
                 }
             }
         )
