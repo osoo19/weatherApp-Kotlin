@@ -1,11 +1,11 @@
 package com.example.myapplication
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.util.Log
-import android.Manifest
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,13 +13,16 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import com.google.gson.Gson
+
 
 class MainViewModel : ViewModel() {
 
@@ -31,6 +34,22 @@ class MainViewModel : ViewModel() {
         location: String,
         callback: VolleyCallback
     ) {
+
+        // キャッシュを確認
+        val currentDate = getCurrentDate()
+        val cacheKey = "weather_$location _ $currentDate"
+        val cachedData = getFromCache(context = context, key = cacheKey)
+
+        if (cachedData != null && cachedData.isNotBlank() && location != "現在地") {
+            // キャッシュが存在する場合はキャッシュのデータを返す
+            // 結果をセット
+            weatherData = parseJsonToWeatherData(cachedData)
+
+            // 成功時のコールバックにデータモデルを渡す
+            weatherData?.let { callback.onSuccess(it) }
+            return
+        }
+
         val apiUrl = context.getString(R.string.five_day_weather_url)
 
         val fullUrl: String = if (location == "現在地") {
@@ -51,8 +70,9 @@ class MainViewModel : ViewModel() {
                     // Volley リクエスト
                     makeVolleyRequest(context, fullUrl)
                 }
-                // 結果をセット
+                // 結果をセット キャッシュに保存
                 weatherData = parseJsonToWeatherData(response)
+                saveToCache(context = context, key = cacheKey, data = response)
 
                 // 成功時のコールバックにデータモデルを渡す
                 weatherData?.let { callback.onSuccess(it) }
@@ -121,8 +141,27 @@ class MainViewModel : ViewModel() {
         } else {
             return null
         }
-
         return locationMap
+    }
+
+    private fun getCurrentDate(): String {
+        val currentDate = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")  // 任意のフォーマットを指定
+
+        return currentDate.format(formatter)
+    }
+
+    // キャッシュを保存するメソッド
+    private fun saveToCache(context: Context, key: String, data: String) {
+        val preferences = context.getSharedPreferences("WeatherCache", Context.MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putString(key, data)
+        editor.apply()
+    }
+
+    private fun getFromCache(context: Context, key: String): String? {
+        val preferences = context.getSharedPreferences("WeatherCache", Context.MODE_PRIVATE)
+        return preferences.getString(key, null)
     }
 
 
