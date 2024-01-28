@@ -135,6 +135,7 @@ class MainActivity : ComponentActivity() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
+            location?.let { Text(text = it + "の天気予報") }
             if (result != null) {
                 LazyColumn(
                     modifier = Modifier
