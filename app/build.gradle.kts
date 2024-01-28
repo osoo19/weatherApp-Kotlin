@@ -68,4 +68,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation("com.android.volley:volley:1.2.1")
+    implementation("com.google.code.gson:gson:2.8.9")
+    implementation ("com.google.accompanist:accompanist-glide:0.15.0")
 }

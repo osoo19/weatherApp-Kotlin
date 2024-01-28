@@ -13,11 +13,12 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import com.google.gson.Gson
 
 class MainViewModel : ViewModel() {
 
     // 結果を保持
-    private var weatherData: String? = null
+    private var weatherData: List<WeatherItem>? = null
 
     fun getWeatherData(
         context: Context,
@@ -43,9 +44,11 @@ class MainViewModel : ViewModel() {
                     makeVolleyRequest(context, fullUrl)
                 }
                 // 結果をセット
-                weatherData = response
-                // 成功時のコールバック
-                callback.onSuccess(response)
+                weatherData = parseJsonToWeatherData(response)
+
+                // 成功時のコールバックにデータモデルを渡す
+                weatherData?.let { callback.onSuccess(it) }
+
             } catch (e: Exception) {
                 // エラー時のコールバック
                 callback.onError(e.message)
@@ -54,7 +57,7 @@ class MainViewModel : ViewModel() {
     }
 
     // 通信結果を取得するメソッド
-    fun getWeatherDataResult(): String? {
+    fun getWeatherDataResult(): List<WeatherItem>? {
         return weatherData
     }
 
@@ -82,8 +85,13 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    private fun parseJsonToWeatherData(jsonData: String): List<WeatherItem>? {
+        val weatherData = Gson().fromJson(jsonData, WeatherData::class.java)
+        return weatherData.list
+    }
+
     interface VolleyCallback {
-        fun onSuccess(result: String)
+        fun onSuccess(result: List<WeatherItem>)
         fun onError(error: String?)
     }
 }

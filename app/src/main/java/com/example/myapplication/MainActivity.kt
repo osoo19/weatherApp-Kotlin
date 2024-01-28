@@ -4,18 +4,23 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -26,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.google.accompanist.glide.rememberGlidePainter
 
 class MainActivity : ComponentActivity() {
     val TAG = "weatherAPP"
@@ -99,15 +105,20 @@ class MainActivity : ComponentActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
             if (result != null) {
-                Text(text = result)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    items(result) { weatherItem ->
+                        WeatherListItem(weatherItem)
+                    }
+                }
             }
         }
-
     }
 
     private fun getWeatherDataAndNavigate(navController: NavController, location: String) {
@@ -117,7 +128,7 @@ class MainActivity : ComponentActivity() {
             longitude = null,
             location = location,
             callback = object : MainViewModel.VolleyCallback {
-                override fun onSuccess(result: String) {
+                override fun onSuccess(result: List<WeatherItem>) {
                     Log.d(TAG, "API Response: $result")
                     navController.navigate("forecast/$location")
                 }
@@ -128,6 +139,40 @@ class MainActivity : ComponentActivity() {
                 }
             }
         )
+    }
+
+    @Composable
+    fun WeatherListItem(weatherItem: WeatherItem) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            val iconUrl =
+                "https://openweathermap.org/img/wn/${weatherItem.weather.firstOrNull()?.icon}@2x.png"
+            val painter = rememberGlidePainter(request = iconUrl, fadeIn = true)
+
+            Image(
+                painter = painter,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(8.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            Text(
+                text = "気温: ${weatherItem.main.temp} °C",
+                modifier = Modifier.padding(8.dp)
+            )
+
+
+            Text(
+                text = "日時: ${weatherItem.dt_txt}",
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 
 
