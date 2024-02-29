@@ -2,7 +2,6 @@ package com.example.myapplication
 
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.Manifest
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -91,29 +92,57 @@ class MainActivity : ComponentActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center
+                .padding(16.dp)
         ) {
-            SearchButton("東京") {
-                getWeatherDataAndNavigate(navController, "Tokyo")
-            }
+            // 画像部分
+            Image(
+                painter = painterResource(R.drawable.hokkaido),
+                contentDescription = "A dog image",
+                modifier = Modifier
+                    .weight(0.3f)
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Fit
+            )
 
-            SearchButton("兵庫") {
-                getWeatherDataAndNavigate(navController, "Hyogo")
-            }
+            // ボタン部分
+            Column(
+                modifier = Modifier
+                    .weight(0.7f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                SearchButton("稚内") {
+                    getWeatherDataAndNavigate(navController, "Wakkanai")
+                }
 
-            SearchButton("大分") {
-                getWeatherDataAndNavigate(navController, "Oita")
-            }
+                SearchButton("旭川") {
+                    getWeatherDataAndNavigate(navController, "Asahikawa")
+                }
 
-            SearchButton("北海道") {
-                getWeatherDataAndNavigate(navController, "Hokkaido")
-            }
-            SearchButton("現在地") {
-                getWeatherDataAndNavigate(navController, "現在地")
+                SearchButton("札幌") {
+                    getWeatherDataAndNavigate(navController, "Sapporo")
+                }
+
+                SearchButton("函館") {
+                    getWeatherDataAndNavigate(navController, "Hakodate")
+                }
+
+                SearchButton("網走") {
+                    getWeatherDataAndNavigate(navController, "Abashiri")
+                }
+
+                SearchButton("根室") {
+                    getWeatherDataAndNavigate(navController, "Nemuro")
+                }
+
+                SearchButton("現在地") {
+                    getWeatherDataAndNavigate(navController, "現在地")
+                }
             }
         }
     }
+
 
     @Composable
     fun SearchButton(location: String, onClick: () -> Unit) {
@@ -219,13 +248,12 @@ class MainActivity : ComponentActivity() {
             )
 
             Text(
-                text = "気温: ${weatherItem.main.temp} °C",
+                text = "日時: ${weatherItem.dt_txt}",
                 modifier = Modifier.padding(8.dp)
             )
 
-
             Text(
-                text = "日時: ${weatherItem.dt_txt}",
+                text = "気温: ${weatherItem.main.temp} °C",
                 modifier = Modifier.padding(8.dp)
             )
         }
