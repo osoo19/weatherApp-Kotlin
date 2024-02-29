@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">北海道内天気アプリ</string>
     <string name="five_day_weather_url">https://api.openweathermap.org/data/2.5/forecast</string>
     <string name="weather_icon_url">https://openweathermap.org/img/wn</string>
     <string name="api_key">53834ee21f38176e9d67b8d477f8888e</string>
